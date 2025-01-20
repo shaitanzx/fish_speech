@@ -1,6 +1,7 @@
 import os
 import ssl
 import sys
+import tempfile
 
 #print('[System ARGV] ' + str(sys.argv))
 
@@ -22,14 +23,14 @@ from build_launcher import build_launcher
 from launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content
 #from modules.model_loader import load_file_from_url
 
-REINSTALL_ALL = False
+REINSTALL_ALL = True
 TRY_INSTALL_XFORMERS = False
 
 
 def prepare_environment():
     torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu118")
     torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.3.0 torchvision==0.18.0 --extra-index-url {torch_index_url}")
+                                   f"pip install torch==2.3.0 torchvision==0.18.0 torchaudio==2.3.0 --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements.txt")
 
     print(f"Python {sys.version}")
@@ -156,4 +157,4 @@ init_cache(config.model_filenames, config.paths_checkpoints, config.lora_filenam
 if not os.path.exists('batch_images'):
     os.mkdir('batch_images')
 """
-from app import *
+from main import *
