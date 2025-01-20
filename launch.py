@@ -2,7 +2,7 @@ import os
 import ssl
 import sys
 
-print('[System ARGV] ' + str(sys.argv))
+#print('[System ARGV] ' + str(sys.argv))
 
 root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(root)
@@ -16,24 +16,24 @@ if "GRADIO_SERVER_PORT" not in os.environ:
 ssl._create_default_https_context = ssl._create_unverified_context
 
 import platform
-import fooocus_version
+#import fooocus_version
 
 from build_launcher import build_launcher
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content
-from modules.model_loader import load_file_from_url
+from launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content
+#from modules.model_loader import load_file_from_url
 
 REINSTALL_ALL = False
 TRY_INSTALL_XFORMERS = False
 
 
 def prepare_environment():
-    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
+    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu118")
     torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url {torch_index_url}")
-    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
+                                   f"pip install torch==2.3.0 torchvision==0.18.0 --extra-index-url {torch_index_url}")
+    requirements_file = os.environ.get('REQS_FILE', "requirements.txt")
 
     print(f"Python {sys.version}")
-    print(f"Fooocus version: {fooocus_version.version}")
+
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
@@ -79,32 +79,32 @@ def ini_args():
 
 prepare_environment()
 build_launcher()
-args = ini_args()
+#args = ini_args()
 
-if args.gpu_device_id is not None:
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
-    print("Set device to:", args.gpu_device_id)
+#if args.gpu_device_id is not None:
+#    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
+#    print("Set device to:", args.gpu_device_id)
 
-if args.hf_mirror is not None:
-    os.environ['HF_MIRROR'] = str(args.hf_mirror)
-    print("Set hf_mirror to:", args.hf_mirror)
+#if args.hf_mirror is not None:
+#    os.environ['HF_MIRROR'] = str(args.hf_mirror)
+#    print("Set hf_mirror to:", args.hf_mirror)
 
-from modules import config
-from modules.hash_cache import init_cache
+#from modules import config
+#from modules.hash_cache import init_cache
 
-os.environ["U2NET_HOME"] = config.path_inpaint
+#os.environ["U2NET_HOME"] = config.path_inpaint
 
-os.environ['GRADIO_TEMP_DIR'] = config.temp_path
+os.environ['GRADIO_TEMP_DIR'] = os.path.join(tempfile.gettempdir(), 'fooocus')
 
-if config.temp_path_cleanup_on_launch:
-    print(f'[Cleanup] Attempting to delete content of temp dir {config.temp_path}')
-    result = delete_folder_content(config.temp_path, '[Cleanup] ')
-    if result:
-        print("[Cleanup] Cleanup successful")
-    else:
-        print(f"[Cleanup] Failed to delete content of temp dir.")
+#if config.temp_path_cleanup_on_launch:
+#    print(f'[Cleanup] Attempting to delete content of temp dir {config.temp_path}')
+#    result = delete_folder_content(config.temp_path, '[Cleanup] ')
+#    if result:
+#        print("[Cleanup] Cleanup successful")
+#    else:
+#        print(f"[Cleanup] Failed to delete content of temp dir.")
 
-
+"""
 def download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads):
     from modules.util import get_file_from_folder_list
 
@@ -155,4 +155,5 @@ config.update_files()
 init_cache(config.model_filenames, config.paths_checkpoints, config.lora_filenames, config.paths_loras)
 if not os.path.exists('batch_images'):
     os.mkdir('batch_images')
-from webui import *
+"""
+from app import *
