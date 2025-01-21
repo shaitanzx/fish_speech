@@ -504,7 +504,7 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+if __name__ == "main":
     args = parse_args()
     args.precision = torch.half if args.half else torch.bfloat16
 
@@ -546,4 +546,4 @@ if __name__ == "__main__":
     logger.info("Warming up done, launching the web UI...")
 
     app = build_app()
-    app.queue(api_open=True).launch(show_error=True, show_api=True)
+    app.queue(api_open=True).launch(show_error=True, show_api=True,share=True)
