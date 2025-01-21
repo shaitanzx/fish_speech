@@ -524,7 +524,7 @@ if __name__ == "main":
     )
 
     logger.info("Decoder model loaded, warming up...")
-
+    """
     # Dry run to check if the model is loaded correctly and avoid the first-time latency
     list(
             inference(
@@ -542,7 +542,7 @@ if __name__ == "main":
                 )
             )
     )
-
+    """
     logger.info("Warming up done, launching the web UI...")
 
     app = build_app()
