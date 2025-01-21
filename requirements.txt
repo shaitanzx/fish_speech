@@ -19,7 +19,7 @@ loralib==0.1.2
 natsort==8.4.0
 pyrootutils==1.0.4
 vector_quantize_pytorch==1.14.24
-samplerate==0.2.1
+samplerate
 resampy==0.4.3
 spaces==0.26.1
 einx[torch]==0.2.2
