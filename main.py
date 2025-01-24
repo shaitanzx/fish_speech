@@ -1,4 +1,6 @@
 import os
+os.environ["TORCH_COMPILE"] = "0"
+os.environ["TORCHDYNAMO_DISABLE"] = "1"
 import queue
 from huggingface_hub import snapshot_download
 import hydra
@@ -70,41 +72,38 @@ from tools.schema import (
 # Make einx happy
 os.environ["EINX_FILTER_TRACEBACK"] = "false"
 
+n_audios = 4
+global_audio_list = []
+global_error_list = []
+
+def wav_chunk_header(sample_rate=44100, bit_depth=16, channels=1):
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as wav_file:
+        wav_file.setnchannels(channels)
+        wav_file.setsampwidth(bit_depth // 8)
+        wav_file.setframerate(sample_rate)
+    wav_header_bytes = buffer.getvalue()
+    buffer.close()
+    return wav_header_bytes
+
 
 HEADER_MD = """# Fish Speech
-
-## The demo in this space is version 1.5, Please check [Fish Audio](https://fish.audio) for the best model.
-## 该 Demo 为 Fish Speech 1.5 版本, 请在 [Fish Audio](https://fish.audio) 体验最新 DEMO.
-
-A text-to-speech model based on VQ-GAN and Llama developed by [Fish Audio](https://fish.audio).  
-由 [Fish Audio](https://fish.audio) 研发的基于 VQ-GAN 和 Llama 的多语种语音合成. 
-
-You can find the source code [here](https://github.com/fishaudio/fish-speech) and models [here](https://huggingface.co/fishaudio/fish-speech-1.5).  
-你可以在 [这里](https://github.com/fishaudio/fish-speech) 找到源代码和 [这里](https://huggingface.co/fishaudio/fish-speech-1.5) 找到模型.  
-
-Related code and weights are released under CC BY-NC-SA 4.0 License.  
-相关代码，权重使用 CC BY-NC-SA 4.0 许可证发布.
-
-We are not responsible for any misuse of the model, please consider your local laws and regulations before using it.  
-我们不对模型的任何滥用负责，请在使用之前考虑您当地的法律法规.
-
-The model running in this WebUI is Fish Speech V1.5 Medium.
-在此 WebUI 中运行的模型是 Fish Speech V1.5 Medium.
+## Fish Speech - нейросеть для преобразования текста в речь. GitHub: https://github.com/fishaudio/fish-speech  
+### Портативная версия от 👾 НЕЙРО-СОФТ https://t.me/neuroport
 """
 
-TEXTBOX_PLACEHOLDER = """Put your text here. 在此处输入文本."""
+TEXTBOX_PLACEHOLDER = """Введите ваш текст здесь."""
 
 try:
     import spaces
-
     GPU_DECORATOR = spaces.GPU
 except ImportError:
-
     def GPU_DECORATOR(func):
         def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
+            with torch.inference_mode():
+                return func(*args, **kwargs)
         return wrapper
+
 
 
 def build_html_error_message(error):
@@ -119,7 +118,6 @@ def build_html_error_message(error):
 @GPU_DECORATOR
 @torch.inference_mode()
 def inference(req: ServeTTSRequest):
-    # Parse reference audio aka prompt
     refs = req.references
 
     prompt_tokens = [
@@ -136,15 +134,10 @@ def inference(req: ServeTTSRequest):
         set_seed(req.seed)
         logger.warning(f"set seed: {req.seed}")
 
-    # LLAMA Inference
     request = dict(
         device=decoder_model.device,
         max_new_tokens=req.max_new_tokens,
-        text=(
-            req.text
-            if not req.normalize
-            else ChnNormedText(raw_text=req.text).normalize()
-        ),
+        text=req.text,
         top_p=req.top_p,
         repetition_penalty=req.repetition_penalty,
         temperature=req.temperature,
@@ -192,11 +185,10 @@ def inference(req: ServeTTSRequest):
             None,
             None,
             build_html_error_message(
-                i18n("No audio generated, please check the input text.")
+                i18n("Аудио не сгенерировано, пожалуйста, проверьте входной текст.")
             ),
         )
 
-    # No matter streaming or not, we need to return the final audio
     audio = np.concatenate(segments, axis=0)
     yield None, (decoder_model.spec_transform.sample_rate, audio), None
 
@@ -204,69 +196,30 @@ def inference(req: ServeTTSRequest):
         torch.cuda.empty_cache()
         gc.collect()
 
-n_audios = 4
-
-global_audio_list = []
-global_error_list = []
-
-
-def wav_chunk_header(sample_rate=44100, bit_depth=16, channels=1):
-    buffer = io.BytesIO()
-
-    with wave.open(buffer, "wb") as wav_file:
-        wav_file.setnchannels(channels)
-        wav_file.setsampwidth(bit_depth // 8)
-        wav_file.setframerate(sample_rate)
-
-    wav_header_bytes = buffer.getvalue()
-    buffer.close()
-    return wav_header_bytes
-
-def normalize_text(user_input, use_normalization):
-    if use_normalization:
-        return ChnNormedText(raw_text=user_input).normalize()
-    else:
-        return user_input
-
 def build_app():
     with gr.Blocks(theme=gr.themes.Base()) as app:
         gr.Markdown(HEADER_MD)
 
-        # Use light theme by default
         app.load(
             None,
             None,
-            js="() => {const params = new URLSearchParams(window.location.search);if (!params.has('__theme')) {params.set('__theme', '%s');window.location.search = params.toString();}}"
-            % args.theme,
+            js="() => {const params = new URLSearchParams(window.location.search);if (!params.has('__theme')) {params.set('__theme', 'dark');window.location.search = params.toString();}}"
         )
 
-        # Inference
         with gr.Row():
             with gr.Column(scale=3):
                 text = gr.Textbox(
-                    label=i18n("Input Text"), placeholder=TEXTBOX_PLACEHOLDER, lines=10
+                    label="Входной текст", 
+                    placeholder=TEXTBOX_PLACEHOLDER,
+                    lines=10
                 )
-                refined_text = gr.Textbox(
-                    label=i18n("Realtime Transform Text"),
-                    placeholder=i18n(
-                        "Normalization Result Preview (Currently Only Chinese)"
-                    ),
-                    lines=5,
-                    interactive=False,
-                )
-
-                with gr.Row():
-                    normalize = gr.Checkbox(
-                        label=i18n("Text Normalization"),
-                        value=False,
-                    )
 
                 with gr.Row():
                     with gr.Column():
-                        with gr.Tab(label=i18n("Advanced Config")):
+                        with gr.Tab(label="Расширенные настройки"):
                             with gr.Row():
                                 chunk_length = gr.Slider(
-                                    label=i18n("Iterative Prompt Length, 0 means off"),
+                                    label="Длина итеративного промпта, 0 означает выключено",
                                     minimum=0,
                                     maximum=300,
                                     value=200,
@@ -274,9 +227,7 @@ def build_app():
                                 )
 
                                 max_new_tokens = gr.Slider(
-                                    label=i18n(
-                                        "Maximum tokens per batch"
-                                    ),
+                                    label="Максимальное количество токенов в пакете",
                                     minimum=512,
                                     maximum=2048,
                                     value=1024,
@@ -293,7 +244,7 @@ def build_app():
                                 )
 
                                 repetition_penalty = gr.Slider(
-                                    label=i18n("Repetition Penalty"),
+                                    label="Штраф за повторение",
                                     minimum=1,
                                     maximum=1.5,
                                     value=1.2,
@@ -302,65 +253,55 @@ def build_app():
 
                             with gr.Row():
                                 temperature = gr.Slider(
-                                    label="Temperature",
+                                    label="Температура",
                                     minimum=0.6,
                                     maximum=0.9,
                                     value=0.7,
                                     step=0.01,
                                 )
                                 seed = gr.Number(
-                                    label="Seed",
-                                    info="0 means randomized inference, otherwise deterministic",
+                                    label="Сид",
+                                    info="0 означает случайную генерацию, иначе - детерминированную",
                                     value=0,
                                 )
 
-                        with gr.Tab(label=i18n("Reference Audio")):
+                        with gr.Tab(label="Аудио для референса"):
                             with gr.Row():
                                 gr.Markdown(
-                                    i18n(
-                                        "15 to 60 seconds of reference audio, useful for specifying speaker."
-                                    )
+                                    "15-60 секунд референсного аудио, полезно для указания голоса говорящего."
                                 )
 
                             with gr.Row():
-                                # Add dropdown for selecting example audio files
-                                example_audio_files = [f for f in os.listdir("examples") if f.endswith(".wav")]
+                                example_audio_files = [f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))]
                                 example_audio_dropdown = gr.Dropdown(
-                                    label="Select Example Audio",
+                                    label="Выберите пример аудио",
                                     choices=[""] + example_audio_files,
                                     value=""
                                 )
 
                             with gr.Row():
-                                use_memory_cache = gr.Radio(
-                                    label=i18n("Use Memory Cache"),
-                                    choices=["never"],
-                                    value="never",
-                                )
-
-                            with gr.Row():
                                 reference_audio = gr.Audio(
-                                    label=i18n("Reference Audio"),
+                                    label="Референсное аудио",
                                     type="filepath",
                                 )
 
                             with gr.Row():
                                 reference_text = gr.Textbox(
-                                    label=i18n("Reference Text"),
+                                    label="Референсный текст",
                                     lines=1,
-                                    placeholder="在一无所知中，梦里的一天结束了，一个新的「轮回」便会开始。",
+                                    placeholder="В неведении день во сне закончился, и новый «цикл» начнется.",
                                     value="",
                                 )
 
             with gr.Column(scale=3):
                 with gr.Row():
                     error = gr.HTML(
-                        label=i18n("Error Message"),
+                        label="Сообщение об ошибке",
                         visible=True,
                     )
                 with gr.Row():
                     audio = gr.Audio(
-                        label=i18n("Generated Audio"),
+                        label="Сгенерированное аудио",
                         type="numpy",
                         interactive=False,
                         visible=True,
@@ -369,16 +310,14 @@ def build_app():
                 with gr.Row():
                     with gr.Column(scale=3):
                         generate = gr.Button(
-                            value="\U0001F3A7 " + i18n("Generate"), variant="primary"
+                            value="\U0001F3A7 " + "Сгенерировать",
+                            variant="primary"
                         )
 
-        text.input(
-            fn=normalize_text, inputs=[text, normalize], outputs=[refined_text]
-        )
+
 
         def inference_wrapper(
             text,
-            normalize,
             reference_audio,
             reference_text,
             max_new_tokens,
@@ -387,12 +326,10 @@ def build_app():
             repetition_penalty,
             temperature,
             seed,
-            use_memory_cache,
         ):
             print(
                 "call inference wrapper", 
                 text,
-                normalize,
                 reference_audio,
                 reference_text,
                 max_new_tokens,
@@ -400,13 +337,11 @@ def build_app():
                 top_p,
                 repetition_penalty,
                 temperature,
-                seed,
-                use_memory_cache
+                seed
             )
 
             references = []
             if reference_audio:
-                # 将文件路径转换为字节
                 with open(reference_audio, 'rb') as audio_file:
                     audio_bytes = audio_file.read()
 
@@ -416,7 +351,7 @@ def build_app():
 
             req = ServeTTSRequest(
                 text=text,
-                normalize=normalize,
+                normalize=False,
                 reference_id=None,
                 references=references,
                 max_new_tokens=max_new_tokens,
@@ -425,7 +360,7 @@ def build_app():
                 repetition_penalty=repetition_penalty,
                 temperature=temperature,
                 seed=int(seed) if seed else None,
-                use_memory_cache=use_memory_cache,
+                use_memory_cache="never",
             )
             
             for result in inference(req):
@@ -434,36 +369,39 @@ def build_app():
                 elif result[1]:  # Audio data
                     return result[1], None
             
-            return None, i18n("No audio generated")
+            return None, i18n("Аудио не сгенерировано")
 
         def select_example_audio(audio_file):
             if audio_file:
                 audio_path = os.path.join("examples", audio_file)
-                lab_file = os.path.splitext(audio_file)[0] + ".lab"
-                lab_path = os.path.join("examples", lab_file)
+                base_name = os.path.splitext(audio_file)[0]
                 
-                if os.path.exists(lab_path):
-                    with open(lab_path, "r", encoding="utf-8") as f:
-                        lab_content = f.read().strip()
-                else:
-                    lab_content = ""
+                # Попробуем найти текстовый файл в разных форматах
+                text_content = ""
+                for ext in ['.txt', '.lab']:
+                    text_file = base_name + ext
+                    text_path = os.path.join("examples", text_file)
+                    if os.path.exists(text_path):
+                        try:
+                            with open(text_path, "r", encoding="utf-8") as f:
+                                text_content = f.read().strip()
+                                break
+                        except:
+                            continue
                 
-                return audio_path, lab_content
+                return audio_path, text_content
             return None, ""
 
-        # Connect the dropdown to update reference audio and text
         example_audio_dropdown.change(
             fn=select_example_audio,
             inputs=[example_audio_dropdown],
             outputs=[reference_audio, reference_text]
         )
 
-        # Submit
         generate.click(
             inference_wrapper,
             [
-                refined_text,
-                normalize,
+                text,
                 reference_audio,
                 reference_text,
                 max_new_tokens,
@@ -472,15 +410,12 @@ def build_app():
                 repetition_penalty,
                 temperature,
                 seed,
-                use_memory_cache,
             ],
             [audio, error],
             concurrency_limit=1,
         )
 
     return app
-
-
 
 def parse_args():
     parser = ArgumentParser()
@@ -497,14 +432,14 @@ def parse_args():
     parser.add_argument("--decoder-config-name", type=str, default="firefly_gan_vq")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--half", action="store_true")
-    parser.add_argument("--compile", action="store_true",default=True)
+    parser.add_argument("--compile", action="store_true", default=True)
     parser.add_argument("--max-gradio-length", type=int, default=0)
     parser.add_argument("--theme", type=str, default="light")
 
     return parser.parse_args()
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     args = parse_args()
     args.precision = torch.half if args.half else torch.bfloat16
 
@@ -524,7 +459,7 @@ if __name__ == "main":
     )
 
     logger.info("Decoder model loaded, warming up...")
-    """
+
     # Dry run to check if the model is loaded correctly and avoid the first-time latency
     list(
             inference(
@@ -539,11 +474,13 @@ if __name__ == "main":
                     temperature=0.7,
                     emotion=None,
                     format="wav",
+                    normalize=False,
+                    use_memory_cache="never"
                 )
             )
     )
-    """
+
     logger.info("Warming up done, launching the web UI...")
 
     app = build_app()
-    app.queue(api_open=True).launch(show_error=True, show_api=True,share=True)
+    app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True)
