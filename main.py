@@ -483,4 +483,4 @@ if __name__ == "__main__":
     logger.info("Warming up done, launching the web UI...")
 
     app = build_app()
-    app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True)
+    app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True, share=True)
