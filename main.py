@@ -439,29 +439,29 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    args = parse_args()
-    args.precision = torch.half if args.half else torch.bfloat16
+#if __name__ == "__main__":
+args = parse_args()
+args.precision = torch.half if args.half else torch.bfloat16
 
-    logger.info("Loading Llama model...")
-    llama_queue = launch_thread_safe_queue(
+logger.info("Loading Llama model...")
+llama_queue = launch_thread_safe_queue(
         checkpoint_path=args.llama_checkpoint_path,
         device=args.device,
         precision=args.precision,
         compile=args.compile,
     )
-    logger.info("Llama model loaded, loading VQ-GAN model...")
+logger.info("Llama model loaded, loading VQ-GAN model...")
 
-    decoder_model = load_decoder_model(
+decoder_model = load_decoder_model(
         config_name=args.decoder_config_name,
         checkpoint_path=args.decoder_checkpoint_path,
         device=args.device,
     )
 
-    logger.info("Decoder model loaded, warming up...")
+logger.info("Decoder model loaded, warming up...")
 
     # Dry run to check if the model is loaded correctly and avoid the first-time latency
-    list(
+list(
             inference(
                 ServeTTSRequest(
                     text="Hello world.",
@@ -478,9 +478,9 @@ if __name__ == "__main__":
                     use_memory_cache="never"
                 )
             )
-    )
+)
 
-    logger.info("Warming up done, launching the web UI...")
+logger.info("Warming up done, launching the web UI...")
 
-    app = build_app()
-    app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True, share=True)
+app = build_app()
+app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True, share=True)
