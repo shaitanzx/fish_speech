@@ -19,7 +19,7 @@ loralib
 natsort
 pyrootutils
 vector_quantize_pytorch==1.14.24
-samplerate
+samplerate==0.1.0
 resampy
 spaces
 einx[torch]==0.2.2
