@@ -75,7 +75,7 @@ os.environ["EINX_FILTER_TRACEBACK"] = "false"
 n_audios = 4
 global_audio_list = []
 global_error_list = []
-
+title = f'Fish Speech V1.5 Medium'
 def wav_chunk_header(sample_rate=44100, bit_depth=16, channels=1):
     buffer = io.BytesIO()
     with wave.open(buffer, "wb") as wav_file:
@@ -100,6 +100,8 @@ Related code and weights are released under CC BY-NC-SA 4.0 License.
 We are not responsible for any misuse of the model, please consider your local laws and regulations before using it.  
 
 The model running in this WebUI is Fish Speech V1.5 Medium.
+
+Repack and Portable by Shahmatist^RMDA. Other projects can be viewed [here](https://github.com/shaitanzx)
 """
 
 TEXTBOX_PLACEHOLDER = """Put your text here."""
@@ -207,7 +209,7 @@ def inference(req: ServeTTSRequest):
         gc.collect()
 
 def build_app():
-    with gr.Blocks(theme=gr.themes.Base()) as app:
+    with gr.Blocks(title=title,theme=gr.themes.Base()) as app:
         gr.Markdown(HEADER_MD)
 
         app.load(
@@ -323,7 +325,7 @@ def build_app():
                             value="\U0001F3A7 " + "Generate",
                             variant="primary"
                         )
-
+        gr.HTML("<div><p style='text-align:center;'>We are in <a href='https://t.me/+xlhhGmrz9SlmYzg6' target='_blank'>Telegram</a></p> </div>")
 
 
         def inference_wrapper(
