@@ -444,6 +444,7 @@ def parse_args():
     parser.add_argument("--compile", action="store_true", default=True)
     parser.add_argument("--max-gradio-length", type=int, default=0)
     parser.add_argument("--theme", type=str, default="light")
+    parser.add_argument("--share", type=bool, default=False)
 
     return parser.parse_args()
 
@@ -492,4 +493,4 @@ list(
 logger.info("Warming up done, launching the web UI...")
 
 app = build_app()
-app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True, share=True)
+app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True, share=args.share)
