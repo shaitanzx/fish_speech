@@ -282,7 +282,7 @@ def build_app():
                                 )
 
                             with gr.Row():
-                                example_audio_files = [f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))]
+                                example_audio_files = sorted([f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))])
                                 example_audio_dropdown = gr.Dropdown(
                                     label="Select Example Audio",
                                     choices=[""] + example_audio_files,
