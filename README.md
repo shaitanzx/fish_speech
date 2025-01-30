@@ -15,9 +15,6 @@ The model running in this WebUI is Fish Speech V1.5 Medium.
   <tr>
     <td><a href="https://colab.research.google.com/github/shaitanzx/fish_speech/blob/main/fish_speech.ipynb" rel="nofollow"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" data-canonical-src="https://colab.research.google.com/assets/colab-badge.svg"></a></td><td>Fish Speech V1.5 Medium in Google Colab</td>
   </tr>
-  <tr>
-    <td><a href="https://colab.research.google.com/github/lllyasviel/Fooocus/blob/main/fooocus_colab.ipynb" rel="nofollow"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" data-canonical-src="https://colab.research.google.com/assets/colab-badge.svg"></a></td><td>Original Fooocus Colab</td>
-  </tr>
 </table>
 
 All suggestions and questions can be voiced in the [Telegram-group](https://t.me/+xlhhGmrz9SlmYzg6)
