@@ -607,10 +607,15 @@ def build_app():
         )
 
             # Обновление заголовка при изменении имени
-            name.change(
+            name.blur(
                 fn=lambda n, v, i=i: gr.update(label=update_accordion_label(n, v, i)),
                 inputs=[name, voice],
-                outputs=[accordion]
+                outputs=[accordion],show_progress=True,queue=False
+            )
+            name.submit(
+                fn=lambda n, v, i=i: gr.update(label=update_accordion_label(n, v, i)),
+                inputs=[name, voice],
+                outputs=[accordion],show_progress=True,queue=False
             )
 
         def generate_dialogue(*args):
