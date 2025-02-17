@@ -47,7 +47,7 @@ from tools.schema import (
     ServeTTSRequest,
     ServeReferenceAudio
 )
-
+file_list = sorted([f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))])
 HEADER_MD = """# 🎭 Fish Speech Dialogue
 
 <div class="container" style="display: flex; width: 100%;">
@@ -248,10 +248,11 @@ def select_example_audio(audio_file, speaker_name, accordion_index):
     return [None, "", *[gr.update() for _ in range(10)]]
 
 def on_dialogue_change(text):
+    global file_list
     dialogue_parts, num_speakers, phrases_count, chars_count = parse_dialogue(text)
-    num_to_show = min(max(num_speakers, 2), 10)
+    num_to_show = min(max(num_speakers, 1), 10)
     stats = update_dialogue_stats(text)
-    example_audio_files = [f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))]
+    example_audio_files = file_list
     
     updates = []
     
@@ -290,8 +291,9 @@ def on_dialogue_change(text):
     return updates
 
 def update_speaker_visibility(num):
+    global file_list
     updates = []
-    example_audio_files = [f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))]
+    example_audio_files = file_list
     
     for i in range(10):
         visible = i < num
@@ -416,9 +418,10 @@ def generate_dialogue_audio(
 
 def build_app():
     with gr.Blocks(theme=gr.themes.Base()) as app:
+        global file_list
         gr.Markdown(HEADER_MD)
 
-        example_audio_files = [f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))]
+        example_audio_files = file_list
         
         app.load(
             None,
@@ -446,10 +449,11 @@ def build_app():
                 with gr.Row():
                     num_speakers = gr.Slider(
                         label="Количество говорящих",
-                        minimum=2,
+                        minimum=1,
                         maximum=10,
                         value=3,
-                        step=1
+                        step=1,
+                        interactive=False
                     )
 
                 speaker_boxes = []
@@ -556,19 +560,21 @@ def build_app():
             with gr.Column(scale=3):
 
                 
-                with gr.Row():
+                with gr.Row(visible=wav_format.value) as wav_panel:
                     audio_wav = gr.Audio(
                         label="WAV",
                         type="filepath",
                         interactive=False,
                         visible=True,
                     )
+                with gr.Row(visible=mp3_format.value) as mp3_panel:
                     audio_mp3 = gr.Audio(
                         label="MP3",
                         type="filepath",
                         interactive=False,
                         visible=True,
                     )
+                with gr.Row(visible=flac_format.value) as flac_panel:
                     audio_flac = gr.Audio(
                         label="FLAC",
                         type="filepath",
@@ -581,7 +587,9 @@ def build_app():
                         value="🎭 Сгенерировать диалог",
                         variant="primary"
                     )
-
+        mp3_format.change(lambda x: gr.update(visible=x), inputs=mp3_format, outputs=mp3_panel, queue=False)
+        wav_format.change(lambda x: gr.update(visible=x), inputs=wav_format, outputs=wav_panel, queue=False)
+        flac_format.change(lambda x: gr.update(visible=x), inputs=flac_format, outputs=flac_panel, queue=False)
         # Обновление при изменении текста диалога
         dialogue_text.change(
                 fn=on_dialogue_change,
