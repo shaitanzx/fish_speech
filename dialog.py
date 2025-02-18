@@ -152,7 +152,7 @@ def parse_dialogue(text):
 
 def update_dialogue_stats(text):
     _, num_speakers, phrases_count, chars_count = parse_dialogue(text)
-    return f"Говорящих: {num_speakers} | Фраз: {phrases_count} | Символов: {chars_count}"
+    return f"Говорящих: {num_speakers} | Реплик: {phrases_count} | Символов: {chars_count}"
 
 def update_accordion_label(speaker_name, voice_file, index):
     if not speaker_name:
@@ -433,9 +433,33 @@ def generate_dialogue_audio(
     yield wav_path, mp3_path, flac_path, None
 
 def build_app():
+    def load_translations(lang):
+        file_path = os.path.join('', f'{lang}.json')
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as file:
+                return json.load(file)
+        else:
+            raise ValueError(f"Translation file for language '{lang}' not found")
+
+    current_language = 'en'
+    translations = load_translations(current_language)
+
+    def set_language(lang):
+        global current_language, translations
+        translations = load_translations(lang)
+        current_language = lang
+    def _(key):
+        return translations.get(key, key)
+    def change_lang():	
+	    global current_language
+	    if current_language=='en':
+		    set_language('ru')
+	    else:
+		    set_language('en')
     with gr.Blocks(theme=gr.themes.Base()) as app:
         global file_list
         gr.Markdown(HEADER_MD)
+        lang=gr.Button=("Change Language")
 
         example_audio_files = file_list
         
@@ -450,7 +474,7 @@ def build_app():
                 initial_text = "Пользователь 1: Ребята, у меня проблема: мой кот постоянно будит меня в 5 утра.\nПользователь 2: Может, он хочет есть? Попробуй кормить его перед сном.\nПользователь 3: Или заведи будильник на 4:30 и разбуди его первым. Пусть знает, каково это!"
                 
                 dialogue_stats = gr.Textbox(
-                    label="Статистика диалога",
+                    label=_('statis_dialog'),
                     value=update_dialogue_stats(initial_text),
                     interactive=False
                     )
@@ -600,7 +624,7 @@ def build_app():
 
                 with gr.Row():
                     generate_button = gr.Button(
-                        value="🎭 Сгенерировать диалог",
+                        value="🎭 Сгенерировать диалог (реплику)",
                         variant="primary"
                     )
         mp3_format.change(lambda x: gr.update(visible=x), inputs=mp3_format, outputs=mp3_panel, queue=False)
@@ -722,6 +746,8 @@ def build_app():
             ],
             concurrency_limit=1,
         )
+    lang.click(change_lang) \
+		.then(lambda: (gr.update()),outputs=dialogue_stats)
 
     return app
 
