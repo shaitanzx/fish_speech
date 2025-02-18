@@ -67,14 +67,16 @@ HEADER_MD = """# 🎭 Fish Speech Dialogue
 <div class="container" style="display: flex; width: 100%;">
 <div style="flex: 1; padding-right: 20px;">
 <h2 style="font-size: 1.5em; margin-bottom: 10px;">Система для озвучивания диалогов различными голосами</h2>
-<p>✏️ Вставтье диалог, где каждая реплика начинается с имени говорящего и двоеточия</p>
+<p>✏️ Вставтье диалог (реплику), где каждая реплика начинается с имени говорящего и двоеточия</p>
 <p>🎤 Укажите голоса, нажмите кнопку генерации</p>
 </div>
 
 <div style="flex: 1; padding-left: 20px;">
 <h2 style="font-size: 1.5em; margin-bottom: 10px;">Авторы:</h2>
-<p><a href="https://t.me/neuro_art0" style="color: #2196F3; text-decoration: none;">Nerual Dreming</a> — Основатель <a href="https://artgeneration.me" style="color: #2196F3; text-decoration: none;">ArtGeneration.me</a>, техноблогер и нейро-евангелист</p>
+<p><a href="https://t.me/neuro_art0" style="color: #2196F3; text-decoration: none;">Nerual Dreming</a> — основной код обработки диалогов - основатель <a href="https://artgeneration.me" style="color: #2196F3; text-decoration: none;">ArtGeneration.me</a>, техноблогер и нейро-евангелист</p>
+<p><a href="https://t.me/FooocusExtend_Support" style="color: #2196F3; text-decoration: none;">Shahmatist^RMDA</a> — некоторые правки, мультиязычный интерфейс, портативный репак</p>
 <p><a href="https://t.me/neuroport" style="color: #2196F3; text-decoration: none;">👾 НЕЙРО-СОФТ</a> — Репаки и портативные версии полезных нейросетей</p>
+<p><a href="https://t.me/FooocusExtend_Support" style="color: #2196F3; text-decoration: none;">👾 FooocusExtend</a> — Форк Fooocus c расширенными и дополнительными функциями</p>
 </div>
 </div>
 """
@@ -427,7 +429,7 @@ def generate_dialogue_audio(
     if 'flac' in selected_formats:
         flac_path = os.path.join(outputs_dir, f"dialogue_{timestamp}.flac")
         torchaudio.save(flac_path, audio_tensor, target_sr)
-    print ('-----------------------------------------------------')
+
     yield wav_path, mp3_path, flac_path, None
 
 def build_app():
@@ -768,26 +770,7 @@ if __name__ == "__main__":
         device=args.device,
     )
 
-    logger.info("Decoder model loaded, warming up...")
 
-    list(
-            inference(
-                ServeTTSRequest(
-                    text="Hello world.",
-                    references=[],
-                    reference_id=None,
-                    max_new_tokens=0,
-                    chunk_length=200,
-                    top_p=0.7,
-                    repetition_penalty=1.5,
-                    temperature=0.7,
-                    emotion=None,
-                    format="wav",
-                    normalize=False,
-                    use_memory_cache="never"
-                ),['wav']
-            )
-    )    
 
     logger.info("Warming up done, launching the web UI...")
 
