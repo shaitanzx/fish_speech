@@ -788,7 +788,6 @@ if __name__ == "__main__":
                 ),['wav']
             )
     )    
-#    list(inference(dummy_request, ['wav']))
 
     logger.info("Warming up done, launching the web UI...")
 
