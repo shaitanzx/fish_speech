@@ -4,7 +4,21 @@ os.environ["TORCHDYNAMO_DISABLE"] = "1"
 root_dir = os.path.dirname(os.path.abspath(__file__))
 outputs_dir = os.path.join(root_dir, "..", "outputs")
 os.makedirs(outputs_dir, exist_ok=True)
-os.environ["GRADIO_TEMP_DIR"] = outputs_dir
+temp_dir = os.path.join(root_dir, "..", "temp")
+os.makedirs(temp_dir, exist_ok=True)
+os.environ["GRADIO_TEMP_DIR"] = temp_dir
+import shutil
+
+for filename in os.listdir(temp_dir):
+    file_path = os.path.join(temp_dir, filename)
+    try:
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+    except Exception as e:
+        print(f'Error delete in {file_path}. {e}')
+
 
 import queue
 from huggingface_hub import snapshot_download
