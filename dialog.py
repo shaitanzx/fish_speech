@@ -2,11 +2,11 @@ import os
 os.environ["TORCH_COMPILE"] = "0"
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 root_dir = os.path.dirname(os.path.abspath(__file__))
-outputs_dir = os.path.join(root_dir, "..", "outputs")
+outputs_dir = os.path.join(root_dir, "outputs")
 os.makedirs(outputs_dir, exist_ok=True)
-temp_dir = os.path.join(root_dir, "..", "temp")
+temp_dir = os.path.join(root_dir, "temp")
 os.makedirs(temp_dir, exist_ok=True)
-os.environ["GRADIO_TEMP_DIR"] = temp_dir
+
 import shutil
 
 for filename in os.listdir(temp_dir):
@@ -19,7 +19,7 @@ for filename in os.listdir(temp_dir):
     except Exception as e:
         print(f'Error delete in {file_path}. {e}')
 
-
+os.environ["GRADIO_TEMP_DIR"] = temp_dir
 import queue
 from huggingface_hub import snapshot_download
 import numpy as np
@@ -427,7 +427,7 @@ def generate_dialogue_audio(
     if 'flac' in selected_formats:
         flac_path = os.path.join(outputs_dir, f"dialogue_{timestamp}.flac")
         torchaudio.save(flac_path, audio_tensor, target_sr)
-
+    print ('-----------------------------------------------------')
     yield wav_path, mp3_path, flac_path, None
 
 def build_app():
@@ -770,22 +770,25 @@ if __name__ == "__main__":
 
     logger.info("Decoder model loaded, warming up...")
 
-    dummy_request = ServeTTSRequest(
-        text="Test.",
-        references=[],
-        reference_id=None,
-        max_new_tokens=0,
-        chunk_length=200,
-        top_p=0.7,
-        repetition_penalty=1.5,
-        temperature=0.7,
-        emotion=None,
-        format="wav",
-        normalize=False,
-        use_memory_cache="never"
-    )
-    
-    list(inference(dummy_request, ['wav']))
+    list(
+            inference(
+                ServeTTSRequest(
+                    text="Hello world.",
+                    references=[],
+                    reference_id=None,
+                    max_new_tokens=0,
+                    chunk_length=200,
+                    top_p=0.7,
+                    repetition_penalty=1.5,
+                    temperature=0.7,
+                    emotion=None,
+                    format="wav",
+                    normalize=False,
+                    use_memory_cache="never"
+                ),['wav']
+            )
+    )    
+#    list(inference(dummy_request, ['wav']))
 
     logger.info("Warming up done, launching the web UI...")
 
