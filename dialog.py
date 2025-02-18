@@ -1,4 +1,5 @@
 import os
+import json
 os.environ["TORCH_COMPILE"] = "0"
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -431,17 +432,19 @@ def generate_dialogue_audio(
         torchaudio.save(flac_path, audio_tensor, target_sr)
 
     yield wav_path, mp3_path, flac_path, None
-
+current_language = 'en'
 def build_app():
+    global current_language
     def load_translations(lang):
         file_path = os.path.join('', f'{lang}.json')
+        print('---------------------',file_path)
         if os.path.exists(file_path):
             with open(file_path, 'r', encoding='utf-8') as file:
                 return json.load(file)
         else:
             raise ValueError(f"Translation file for language '{lang}' not found")
 
-    current_language = 'en'
+
     translations = load_translations(current_language)
 
     def set_language(lang):
@@ -451,15 +454,17 @@ def build_app():
     def _(key):
         return translations.get(key, key)
     def change_lang():	
-	    global current_language
-	    if current_language=='en':
-		    set_language('ru')
-	    else:
-		    set_language('en')
+       global current_language
+       if current_language=='en':
+		      set_language('ru')
+       else:
+          set_language('en')
+       return _('statis_dialog')
+
     with gr.Blocks(theme=gr.themes.Base()) as app:
         global file_list
         gr.Markdown(HEADER_MD)
-        lang=gr.Button=("Change Language")
+        lang=gr.Button("Change Language")
 
         example_audio_files = file_list
         
@@ -746,8 +751,7 @@ def build_app():
             ],
             concurrency_limit=1,
         )
-    lang.click(change_lang) \
-		.then(lambda: (gr.update()),outputs=dialogue_stats)
+        lang.click(change_lang, outputs=dialogue_stats)
 
     return app
 
