@@ -433,7 +433,9 @@ def generate_dialogue_audio(
 
     yield wav_path, mp3_path, flac_path, None
 current_language = 'en'
-def load_translations(lang):
+def build_app():
+    global current_language
+    def load_translations(lang):
         file_path = os.path.join('', f'{lang}.json')
         print('---------------------',file_path)
         if os.path.exists(file_path):
@@ -442,23 +444,24 @@ def load_translations(lang):
         else:
             raise ValueError(f"Translation file for language '{lang}' not found")
 
-translations = load_translations(current_language)
 
-def set_language(lang):
+    translations = load_translations(current_language)
+
+    def set_language(lang):
         global current_language, translations
         translations = load_translations(lang)
         current_language = lang
-def _(key):
+    def _(key):
         return translations.get(key, key)
-def change_lang():	
+    def change_lang():	
        global current_language
        if current_language=='en':
 		      set_language('ru')
        else:
           set_language('en')
-       return
+       return _('statis_dialog')
 
-with gr.Blocks(theme=gr.themes.Base()) as app:
+    with gr.Blocks(theme=gr.themes.Base()) as app:
         global file_list
         gr.Markdown(HEADER_MD)
         lang=gr.Button("Change Language")
@@ -801,5 +804,5 @@ if __name__ == "__main__":
 
     logger.info("Warming up done, launching the web UI...")
 
-    
-    app.launch(show_error=True, show_api=True, inbrowser=True, share=args.share)
+    app = build_app()
+    app.queue(api_open=True).launch(show_error=True, show_api=True, inbrowser=True, share=args.share)
