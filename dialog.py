@@ -156,7 +156,10 @@ def parse_dialogue(text):
 
 def update_dialogue_stats(text):
     _, num_speakers, phrases_count, chars_count = parse_dialogue(text)
-    return f"Говорящих: {num_speakers} | Реплик: {phrases_count} | Символов: {chars_count}"
+    asd=gettext('asd')
+    rep=gettext('Реплик')
+    sym=gettext('Символов')
+    return f"{asd}: {num_speakers} | {rep}: {phrases_count} | {sym}: {chars_count}"
 
 def update_accordion_label(speaker_name, voice_file, index):
     if not speaker_name:
@@ -468,7 +471,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                     )
                 
                 dialogue_text = gr.Textbox(
-                    label="Текст диалога",
+                    label=gettext("Text of the dialogue (replica)"),
                     value=initial_text,
                     placeholder="Пользователь 1: Привет!\nПользователь 2: Здравствуйте!",
                     lines=10
@@ -476,7 +479,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
 
                 with gr.Row():
                     num_speakers = gr.Slider(
-                        label="Количество говорящих",
+                        label=gettext("Number of speakers"),
                         minimum=1,
                         maximum=10,
                         value=3,
@@ -502,24 +505,24 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                         visible=(i < 3)
                     ) as speaker_accordion:
                         speaker_name = gr.Textbox(
-                            label=f"Имя говорящего {i+1}",
+                            label=gettext(f"Имя говорящего {i+1}"),
                             value=initial_name
                         )
                         
                         example_audio = gr.Dropdown(
-                            label=f"Пример голоса {i+1}",
+                            label=gettext(f"Пример голоса {i+1}"),
                             choices=[""] + example_audio_files,
                             value=initial_audio
                         )
                         
                         speaker_voice = gr.Audio(
-                            label=f"Голос говорящего {i+1}",
+                            label=gettext(f"Голос говорящего {i+1}"),
                             type="filepath",
                             value=initial_audio_path
                         )
                         
                         voice_transcript = gr.Textbox(
-                            label="Транскрипция",
+                            label=gettext("Transcription"),
                             lines=3,
                             interactive=True,
                             value=initial_transcript
@@ -529,10 +532,10 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
 
                 with gr.Row():
                     with gr.Column():
-                        with gr.Accordion(label="Расширенные настройки", open=False):
+                        with gr.Accordion(label=gettext("Advanced settings"), open=False):
                             with gr.Row():
                                 chunk_length = gr.Slider(
-                                    label="Длина итеративного промпта",
+                                    label=gettext("Iterative Prompt Length, 0 means off"),
                                     minimum=0,
                                     maximum=300,
                                     value=200,
@@ -540,7 +543,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                                 )
                                 
                                 max_new_tokens = gr.Slider(
-                                    label="Максимальное количество токенов",
+                                    label=gettext("Maximum tokens per batch"),
                                     minimum=512,
                                     maximum=2048,
                                     value=1024,
@@ -557,7 +560,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                                 )
 
                                 repetition_penalty = gr.Slider(
-                                    label="Штраф за повторение",
+                                    label=gettext("Repetition Penalty"),
                                     minimum=1,
                                     maximum=1.5,
                                     value=1.2,
@@ -566,20 +569,20 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
 
                             with gr.Row():
                                 temperature = gr.Slider(
-                                    label="Температура",
+                                    label=gettext("Temperature"),
                                     minimum=0.6,
                                     maximum=0.9,
                                     value=0.7,
                                     step=0.01,
                                 )
                                 seed = gr.Number(
-                                    label="Сид",
+                                    label=gettext("Seed"),
                                     value=0,
-                                    info="0 означает случайную генерацию"
+                                    info=gettext("0 means randomized inference, otherwise deterministic")
                                 )
 
                             with gr.Row():
-                                gr.Markdown("### Форматы сохранения")
+                                gr.Markdown(gettext("The format of the saved audio file"))
                             with gr.Row():
                                 wav_format = gr.Checkbox(label="WAV", value=True)
                                 mp3_format = gr.Checkbox(label="MP3", value=False)
@@ -612,7 +615,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
 
                 with gr.Row():
                     generate_button = gr.Button(
-                        value="🎭 Сгенерировать диалог (реплику)",
+                        value=gettext("🎭 Generate dialogue (replica)"),
                         variant="primary"
                     )
         mp3_format.change(lambda x: gr.update(visible=x), inputs=mp3_format, outputs=mp3_panel, queue=False)
