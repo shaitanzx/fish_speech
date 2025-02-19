@@ -35,6 +35,8 @@ from pathlib import Path
 from functools import partial
 
 import gradio as gr
+import gradio_i18n
+from gradio_i18n import gettext, translate_blocks
 import librosa
 import torch
 import torchaudio
@@ -62,6 +64,7 @@ from tools.schema import (
     ServeTTSRequest,
     ServeReferenceAudio
 )
+
 file_list = sorted([f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))])
 HEADER_MD = """# 🎭 Fish Speech Dialogue
 
@@ -433,35 +436,18 @@ def generate_dialogue_audio(
 
     yield wav_path, mp3_path, flac_path, None
 
-def load_translations(lang):
-        file_path = os.path.join('', f'{lang}.json')
-        print('---------------------',file_path)
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as file:
-                return json.load(file)
-        else:
-            raise ValueError(f"Translation file for language '{lang}' not found")
 
-current_language = 'ru'
-translations = load_translations(current_language)
 
-def set_language(lang):
-        global current_language, translations
-        translations = load_translations(lang)
-        current_language = lang
-def _(key):
-        return translations.get(key, key)
-def change_lang():	
-       global current_language
-       if current_language=='en':
-		      set_language('ru')
-       else:
-          set_language('en')
+trans_file = "translations.json"
+if not os.path.exists(trans_file):
+    lang_store = {}
+else:
+    lang_store = json.load(open(trans_file))
 
 with gr.Blocks(theme=gr.themes.Base()) as app:
 
         gr.Markdown(HEADER_MD)
-        lang=gr.Button("Change Language")
+        lang = gr.Dropdown(choices=["en", "ru"],interactive=True)
 
         example_audio_files = file_list
         
@@ -476,7 +462,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                 initial_text = "Пользователь 1: Ребята, у меня проблема: мой кот постоянно будит меня в 5 утра.\nПользователь 2: Может, он хочет есть? Попробуй кормить его перед сном.\nПользователь 3: Или заведи будильник на 4:30 и разбуди его первым. Пусть знает, каково это!"
                 
                 dialogue_stats = gr.Textbox(
-                    label=i18n('statis_dialog'),
+                    label=gettext("Dialogue (replica) statistics"),
                     value=update_dialogue_stats(initial_text),
                     interactive=False
                     )
@@ -748,9 +734,12 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
             ],
             concurrency_limit=1,
         )
-        lang.click(change_lang) \
-		            .then(lambda: (gr.update()),outputs=dialogue_stats)
+#        lang.click(change_lang) \
+#		            .then(lambda: (gr.update()),outputs=dialogue_stats)
+        gradio_i18n.translate_blocks(app, lang_store, lang=lang)
 
+collected_texts = gradio_i18n.dump_blocks(app, langs=["en", "ru"], include_translations=lang_store)
+json.dump(collected_texts, open(trans_file, "w"), indent=2, ensure_ascii=False)
 
 def parse_args():
     parser = ArgumentParser()

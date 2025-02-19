@@ -10,6 +10,7 @@ einops
 librosa
 rich
 gradio
+gradio-i18n
 wandb
 grpcio
 kui
