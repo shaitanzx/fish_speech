@@ -432,7 +432,7 @@ def generate_dialogue_audio(
         torchaudio.save(flac_path, audio_tensor, target_sr)
 
     yield wav_path, mp3_path, flac_path, None
-current_language = 'en'
+
 def load_translations(lang):
         file_path = os.path.join('', f'{lang}.json')
         print('---------------------',file_path)
@@ -442,6 +442,7 @@ def load_translations(lang):
         else:
             raise ValueError(f"Translation file for language '{lang}' not found")
 
+current_language = 'ru'
 translations = load_translations(current_language)
 
 def set_language(lang):
@@ -456,10 +457,9 @@ def change_lang():
 		      set_language('ru')
        else:
           set_language('en')
-       return
 
 with gr.Blocks(theme=gr.themes.Base()) as app:
-        global file_list
+
         gr.Markdown(HEADER_MD)
         lang=gr.Button("Change Language")
 
@@ -476,7 +476,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                 initial_text = "Пользователь 1: Ребята, у меня проблема: мой кот постоянно будит меня в 5 утра.\nПользователь 2: Может, он хочет есть? Попробуй кормить его перед сном.\nПользователь 3: Или заведи будильник на 4:30 и разбуди его первым. Пусть знает, каково это!"
                 
                 dialogue_stats = gr.Textbox(
-                    label=_('statis_dialog'),
+                    label=i18n('statis_dialog'),
                     value=update_dialogue_stats(initial_text),
                     interactive=False
                     )
@@ -748,9 +748,9 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
             ],
             concurrency_limit=1,
         )
-        lang.click(change_lang, outputs=dialogue_stats)
+        lang.click(change_lang) \
+		            .then(lambda: (gr.update()),outputs=dialogue_stats)
 
-    return app
 
 def parse_args():
     parser = ArgumentParser()
