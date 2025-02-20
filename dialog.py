@@ -442,16 +442,11 @@ def generate_dialogue_audio(
 
 
 trans_file = "translations.json"
-if not os.path.exists(trans_file):
-    lang_store = {}
-else:
-    lang_store = json.load(open(trans_file))
+lang_store = json.load(open(trans_file))
 
 with gr.Blocks(theme=gr.themes.Base()) as app:
-
         gr.Markdown(HEADER_MD)
-        lang = gr.Dropdown(choices=["en", "ru"],interactive=True)
-
+        lang = gr.Dropdown(choices=["en", "ru"],interactive=True,value="en")
         example_audio_files = file_list
         
         app.load(
@@ -504,8 +499,9 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                         open=False,
                         visible=(i < 3)
                     ) as speaker_accordion:
+                        o=i+1
                         speaker_name = gr.Textbox(
-                            label=gettext(f"Имя говорящего {i+1}"),
+                            label=gettext("Speaker's name") + f" {o}",
                             value=initial_name
                         )
                         
@@ -739,10 +735,10 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
         )
 #        lang.click(change_lang) \
 #		            .then(lambda: (gr.update()),outputs=dialogue_stats)
-        gradio_i18n.translate_blocks(app, lang_store, lang=lang)
+        gradio_i18n.translate_blocks(app, lang_store, lang)
 
-collected_texts = gradio_i18n.dump_blocks(app, langs=["en", "ru"], include_translations=lang_store)
-json.dump(collected_texts, open(trans_file, "w"), indent=2, ensure_ascii=False)
+#collected_texts = gradio_i18n.dump_blocks(app, langs=["en", "ru"], include_translations=lang_store)
+#json.dump(collected_texts, open(trans_file, "w"), indent=2, ensure_ascii=False)
 
 def parse_args():
     parser = ArgumentParser()
