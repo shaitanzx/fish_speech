@@ -156,17 +156,14 @@ def parse_dialogue(text):
 
 def update_dialogue_stats(text):
     _, num_speakers, phrases_count, chars_count = parse_dialogue(text)
-    asd=gettext('asd')
-    rep=gettext('Реплик')
-    sym=gettext('Символов')
-    return f"{asd}: {num_speakers} | {rep}: {phrases_count} | {sym}: {chars_count}"
+    return gettext("Speakers:") + f" {num_speakers} | " + gettext("Replicas:") + f" {phrases_count} | " + gettext("Symbols:") + f" {chars_count}"
 
 def update_accordion_label(speaker_name, voice_file, index):
     if not speaker_name:
-        return f"Говорящий {index+1}"
+        return gettext("Speaker") + f" {index+1}"
     
-    voice_name = os.path.basename(voice_file) if voice_file else "Нет голоса"
-    return f"Говорящий {index+1} - {speaker_name} - {voice_name}"
+    voice_name = os.path.basename(voice_file) if voice_file else gettext("No voice")
+    return gettext("Speaker") +f" {index+1} - {speaker_name} - {voice_name}"
 
 @GPU_DECORATOR
 @torch.inference_mode()
@@ -232,7 +229,7 @@ def inference(req: ServeTTSRequest, selected_formats):
         segments.append(fake_audios)
 
     if len(segments) == 0:
-        yield None, None, build_html_error_message("Аудио не сгенерировано"), None, None, None
+        yield None, None, build_html_error_message(gettext("Audio not generated")), None, None, None
         return
 
     audio = np.concatenate(segments, axis=0)
@@ -299,7 +296,7 @@ def on_dialogue_change(text):
             ])
         else:
             # Для дополнительных слотов создаем нового пользователя
-            name = f"Пользователь {i+1}"
+            name = gettext("User") + f" {i+1}"
             initial_audio = np.random.choice(example_audio_files) if example_audio_files else ""
             initial_audio_path = os.path.join("examples", initial_audio) if initial_audio else None
             initial_transcript = get_audio_transcription(initial_audio_path) if initial_audio_path else ""
@@ -328,7 +325,7 @@ def update_speaker_visibility(num):
             
             updates.extend([
                 gr.update(visible=True),
-                gr.update(value=f"Пользователь {i+1}"),
+                gr.update(value=gettext("User") +f" {i+1}"),
                 gr.update(value=voice_path),
                 gr.update(value=transcript),
                 gr.update(value=voice, choices=[""] + example_audio_files)
@@ -445,7 +442,7 @@ trans_file = "translations.json"
 lang_store = json.load(open(trans_file))
 
 with gr.Blocks(theme=gr.themes.Base()) as app:
-        gr.Markdown(HEADER_MD)
+        gr.Markdown(gettext("HEADER_MD"))
         lang = gr.Dropdown(choices=["eng", "rus"],interactive=True,value="eng")
         example_audio_files = file_list
         
@@ -457,7 +454,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
 
         with gr.Row():
             with gr.Column(scale=3):
-                initial_text = "Пользователь 1: Ребята, у меня проблема: мой кот постоянно будит меня в 5 утра.\nПользователь 2: Может, он хочет есть? Попробуй кормить его перед сном.\nПользователь 3: Или заведи будильник на 4:30 и разбуди его первым. Пусть знает, каково это!"
+                initial_text = gettext("example_text")
                 
                 dialogue_stats = gr.Textbox(
                     label=gettext("Dialogue (replica) statistics"),
@@ -468,7 +465,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                 dialogue_text = gr.Textbox(
                     label=gettext("Text of the dialogue (replica)"),
                     value=initial_text,
-                    placeholder="Пользователь 1: Привет!\nПользователь 2: Здравствуйте!",
+                    placeholder=gettext("User 1: Hi!\nUser 2: Hello!"),
                     lines=10
                 )
 
@@ -486,7 +483,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                 initial_parts, _, _, _ = parse_dialogue(initial_text)
                 
                 for i in range(10):
-                    initial_name =gettext(f"Пользователь {i+1}")
+                    initial_name =gettext("User") + f" {i+1}"
                     if i < len(initial_parts):
                         initial_name = initial_parts[i][0]
                         
@@ -499,20 +496,19 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                         open=False,
                         visible=(i < 3)
                     ) as speaker_accordion:
-                        o=i+1
                         speaker_name = gr.Textbox(
-                            label=gettext("Speaker's name") + f" {o}",
+                            label=gettext("Speaker's name") + f" {i+1}",
                             value=initial_name
                         )
                         
                         example_audio = gr.Dropdown(
-                            label=gettext(f"Reference voice {i+1}"),
+                            label=gettext("Reference voice") + f" {i+1}",
                             choices=[""] + example_audio_files,
                             value=initial_audio
                         )
                         
                         speaker_voice = gr.Audio(
-                            label=gettext(f"Голос говорящего {i+1}"),
+                            label=gettext("Example of voice") + f" {i+1}",
                             type="filepath",
                             value=initial_audio_path
                         )
