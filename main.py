@@ -445,7 +445,7 @@ js_func="""
             document.body.classList.toggle('dark');
         }
         """
-with gr.Blocks(js=js_func) as app:
+with gr.Blocks(js=js_func,title="Fish Speech Dialog Mod") as app:
         gr.Markdown(gettext("HEADER_MD"))
         lang = gr.Dropdown(label="Select interface language",choices=["eng", "rus"],interactive=True,value="eng")
         example_audio_files = file_list
