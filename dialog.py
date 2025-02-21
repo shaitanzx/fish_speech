@@ -66,24 +66,7 @@ from tools.schema import (
 )
 
 file_list = sorted([f for f in os.listdir("examples") if f.lower().endswith(('.wav', '.mp3'))])
-#HEADER_MD = """# 🎭 Fish Speech Dialogue
 
-#<div class="container" style="display: flex; width: 100%;">
-#<div style="flex: 1; padding-right: 20px;">
-#<h2 style="font-size: 1.5em; margin-bottom: 10px;">Система для озвучивания диалогов различными голосами</h2>
-#<p>✏️ Вставтье диалог (реплику), где каждая реплика начинается с имени говорящего и двоеточия</p>
-#<p>🎤 Укажите голоса, нажмите кнопку генерации</p>
-#</div>
-
-#<div style="flex: 1; padding-left: 20px;">
-#<h2 style="font-size: 1.5em; margin-bottom: 10px;">Авторы:</h2>
-#<p><a href="https://t.me/neuro_art0" style="color: #2196F3; text-decoration: none;">Nerual Dreming</a> — основной код обработки диалогов - основатель <a href="https://artgeneration.me" style="color: #2196F3; text-decoration: none;">ArtGeneration.me</a>, техноблогер и нейро-евангелист</p>
-#<p><a href="https://t.me/FooocusExtend_Support" style="color: #2196F3; text-decoration: none;">Shahmatist^RMDA</a> — некоторые правки, мультиязычный интерфейс, портативный репак</p>
-#<p><a href="https://t.me/neuroport" style="color: #2196F3; text-decoration: none;">👾 НЕЙРО-СОФТ</a> — Репаки и портативные версии полезных нейросетей</p>
-#<p><a href="https://t.me/FooocusExtend_Support" style="color: #2196F3; text-decoration: none;">👾 FooocusExtend</a> — Форк Fooocus c расширенными и дополнительными функциями</p>
-#</div>
-#</div>
-#"""
 
 try:
     import spaces
@@ -440,17 +423,21 @@ def generate_dialogue_audio(
 
 trans_file = "translations.json"
 lang_store = json.load(open(trans_file))
-
-with gr.Blocks(theme=gr.themes.Base()) as app:
+js_func="""
+        () => {
+            document.body.classList.toggle('dark');
+        }
+        """
+with gr.Blocks(js=js_func) as app:
         gr.Markdown(gettext("HEADER_MD"))
-        lang = gr.Dropdown(choices=["eng", "rus"],interactive=True,value="eng")
+        lang = gr.Dropdown(label="Select interface language",choices=["eng", "rus"],interactive=True,value="eng")
         example_audio_files = file_list
         
-        app.load(
-            None,
-            None,
-            js="() => {const params = new URLSearchParams(window.location.search);if (!params.has('__theme')) {params.set('__theme', 'dark');window.location.search = params.toString();}}"
-        )
+#        app.load(
+#            None,
+#            None,
+#            js="() => {const params = new URLSearchParams(window.location.search);if (!params.has('__theme')) {params.set('__theme', 'dark');window.location.search = params.toString();}}"
+#        )
 
         with gr.Row():
             with gr.Column(scale=3):
@@ -690,7 +677,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
             dialogue_parts, _, _, _ = parse_dialogue(dialogue_text_value)
             
             if not dialogue_parts:
-                return None, None, None, "Не удалось разобрать текст диалога. Убедитесь, что каждая реплика начинается с имени говорящего и двоеточия."
+                return None, None, None, gettext("The dialogue text could not be parsed. Make sure each line begins with the speaker's name and a colon.")
             
             for result in generate_dialogue_audio(
                 dialogue_parts,
