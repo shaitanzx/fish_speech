@@ -1,5 +1,8 @@
 # Fish Speech Dialog Mod
 
+![image](https://github.com/user-attachments/assets/aeddc201-6842-4e17-bbd5-63c02e4af467)
+
+
 Fish Speech Dialogue is a powerful Fish Speech-based add-on designed to generate voiceovers, not just lines, but entire dialogues using different voices. This tool allows you to automatically recognize and assign voices to the speakers in the dialogue, which makes the process of creating voiceovers fast and convenient. This repack is made on the basis of and especially for the friendly project [NEURO-SOFT](https://t.me/neuroport) from [Nerual Dreming](https://t.me/neuro_art0).
 
 Main features of Fish Speech Dialog Mod:
@@ -9,7 +12,8 @@ Main features of Fish Speech Dialog Mod:
 - Save formats: Save results in WAV, MP3 and FLAC formats. Once generated in the ‘output’ folder, saves each dialogue cue to a separate file and to the whole file
 - Advanced settings: Customise generation parameters such as prompt length, maximum number of tokens, temperature and repetition penalty.
 
-Translated with DeepL.com (free version)
+![image](https://github.com/user-attachments/assets/c455bc36-1d24-48a4-8939-fa9e613a506e)
+
 
 Fish Speech Dialogue — это мощное дополнение на базе Fish Speech, разработанное для генерации озвучки, не только реплик, но целых диалогов с использованием различных голосов. Этот инструмент позволяет автоматически распознавать и назначать голоса говорящим в диалоге, что делает процесс создания озвучки быстрым и удобным. Данный репак сделан на основе и специально для дружественного проекта [НЕЙРО-СОФТ](https://t.me/neuroport) от [Nerual Dreming](https://t.me/neuro_art0)
 
