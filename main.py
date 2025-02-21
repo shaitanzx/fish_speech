@@ -13,9 +13,9 @@ install("gradio_i18n")
 
 import os
 import json
-root = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(root)
-os.chdir(root)
+#root = os.path.dirname(os.path.abspath(__file__))
+#sys.path.append(root)
+#os.chdir(root)
 os.environ["TORCH_COMPILE"] = "0"
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 root_dir = os.path.dirname(os.path.abspath(__file__))
