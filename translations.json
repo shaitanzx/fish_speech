@@ -1,9 +1,10 @@
 {
-  "en": {
+  "eng": {
     "Dialogue (replica) statistics": "Dialogue (replica) statistics",
     "Text of the dialogue (replica)": "Text of the dialogue (replica)",
     "Number of speakers": "Number of speakers",
     "Speaker's name": "Speaker's name",
+    "Reference voice {i+1}": "Reference voice {i+1}",
     "Transcription": "Transcription",
     "Iterative Prompt Length, 0 means off": "Iterative Prompt Length, 0 means off",
     "Maximum tokens per batch": "Maximum tokens per batch",
@@ -15,11 +16,12 @@
     "Advanced settings": "Advanced settings",
     "🎭 Generate dialogue (replica)": "🎭 Generate dialogue (replica)"
   },
-  "ru": {
+  "rus": {
     "Dialogue (replica) statistics": "Статистика диалога (реплики)",
     "Text of the dialogue (replica)": "Текст диалога (реплики)",
     "Number of speakers": "Количество говорящих",
     "Speaker's name": "Имя говорящего",
+    "Reference voice {i+1}": "Референтный голос {i+1}",
     "Transcription": "Транскрипция",
     "Iterative Prompt Length, 0 means off": "Длина итеративного промпта, 0 означает выключено",
     "Maximum tokens per batch": "Максимальное количество токенов в очереди",
@@ -30,5 +32,6 @@
     "The format of the saved audio file": "Формат, сохраняемого аудиофайла",
     "Advanced settings": "Расширенные настройки",
     "🎭 Generate dialogue (replica)": "🎭 Сгенерировать диалог (реплику)"
+    "User {i+1}"Пользователь {i+1}
   }
 }

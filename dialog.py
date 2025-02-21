@@ -446,7 +446,7 @@ lang_store = json.load(open(trans_file))
 
 with gr.Blocks(theme=gr.themes.Base()) as app:
         gr.Markdown(HEADER_MD)
-        lang = gr.Dropdown(choices=["en", "ru"],interactive=True,value="en")
+        lang = gr.Dropdown(choices=["eng", "rus"],interactive=True,value="eng")
         example_audio_files = file_list
         
         app.load(
@@ -486,7 +486,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                 initial_parts, _, _, _ = parse_dialogue(initial_text)
                 
                 for i in range(10):
-                    initial_name = f"Пользователь {i+1}"
+                    initial_name =gettext(f"Пользователь {i+1}")
                     if i < len(initial_parts):
                         initial_name = initial_parts[i][0]
                         
@@ -506,7 +506,7 @@ with gr.Blocks(theme=gr.themes.Base()) as app:
                         )
                         
                         example_audio = gr.Dropdown(
-                            label=gettext(f"Пример голоса {i+1}"),
+                            label=gettext(f"Reference voice {i+1}"),
                             choices=[""] + example_audio_files,
                             value=initial_audio
                         )
