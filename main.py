@@ -450,12 +450,6 @@ with gr.Blocks(js=js_func) as app:
         lang = gr.Dropdown(label="Select interface language",choices=["eng", "rus"],interactive=True,value="eng")
         example_audio_files = file_list
         
-#        app.load(
-#            None,
-#            None,
-#            js="() => {const params = new URLSearchParams(window.location.search);if (!params.has('__theme')) {params.set('__theme', 'dark');window.location.search = params.toString();}}"
-#        )
-
         with gr.Row():
             with gr.Column(scale=3):
                 initial_text = gettext("example_text")
@@ -733,8 +727,6 @@ with gr.Blocks(js=js_func) as app:
             ],
             concurrency_limit=1,
         )
-#        lang.click(change_lang) \
-#		            .then(lambda: (gr.update()),outputs=dialogue_stats)
         gradio_i18n.translate_blocks(app, lang_store, lang)
 
 #collected_texts = gradio_i18n.dump_blocks(app, langs=["en", "ru"], include_translations=lang_store)
@@ -762,32 +754,32 @@ def parse_args():
 
     return parser.parse_args()
 
-if __name__ == "__main__":
-    os.makedirs("checkpoints", exist_ok=True)
-    snapshot_download(repo_id="fishaudio/fish-speech-1.5", local_dir="./checkpoints/fish-speech-1.5")
-    print("All checkpoints downloaded")
+#if __name__ == "__main__":
+os.makedirs("checkpoints", exist_ok=True)
+snapshot_download(repo_id="fishaudio/fish-speech-1.5", local_dir="./checkpoints/fish-speech-1.5")
+print("All checkpoints downloaded")
 
-    args = parse_args()
-    args.precision = torch.half if args.half else torch.bfloat16
+args = parse_args()
+args.precision = torch.half if args.half else torch.bfloat16
 
-    logger.info("Loading Llama model...")
-    llama_queue = launch_thread_safe_queue(
-        checkpoint_path=args.llama_checkpoint_path,
-        device=args.device,
-        precision=args.precision,
-        compile=args.compile,
-    )
-    logger.info("Llama model loaded, loading VQ-GAN model...")
+logger.info("Loading Llama model...")
+llama_queue = launch_thread_safe_queue(
+    checkpoint_path=args.llama_checkpoint_path,
+    device=args.device,
+    precision=args.precision,
+    compile=args.compile,
+)
+logger.info("Llama model loaded, loading VQ-GAN model...")
 
-    decoder_model = load_decoder_model(
-        config_name=args.decoder_config_name,
-        checkpoint_path=args.decoder_checkpoint_path,
-        device=args.device,
-    )
+decoder_model = load_decoder_model(
+    config_name=args.decoder_config_name,
+    checkpoint_path=args.decoder_checkpoint_path,
+    device=args.device,
+)
 
 
 
-    logger.info("Warming up done, launching the web UI...")
+logger.info("Warming up done, launching the web UI...")
 
     
-    app.launch(show_error=True, show_api=True, inbrowser=True, share=args.share)
+app.launch(show_error=True, show_api=True, inbrowser=True, share=args.share)
