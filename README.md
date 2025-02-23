@@ -12,6 +12,12 @@ Main features of Fish Speech Dialog Mod:
 - Save formats: Save results in WAV, MP3 and FLAC formats. Once generated in the ‘output’ folder, saves each dialogue cue to a separate file and to the whole file
 - Advanced settings: Customise generation parameters such as prompt length, maximum number of tokens, temperature and repetition penalty.
 
+**Disclaimer:**
+
+All sample voices are taken from public sources and are presented with respect for their bearers and for demonstration purposes only. For commercial use, we recommend contacting the authors. Unauthorized use of other people's voices for commercial purposes and without permission not only violates the rights of their owners, but may also be prosecuted. We strongly prohibit and condemn the use of this technology to violate anyone's rights or to commit illegal acts!
+
+You can grab other voices [here](https://t.me/neuroportchat/6633) 
+
 ![image](https://github.com/user-attachments/assets/c455bc36-1d24-48a4-8939-fa9e613a506e)
 
 
@@ -23,6 +29,12 @@ Fish Speech Dialogue — это мощное дополнение на базе 
 - Гибкая настройка голосов: Использует базу голосов из папки 'examples'. Все готово сразу после установки.
 - Форматы сохранения: Сохраняйте результаты в форматах WAV, MP3 и FLAC. После генерации в папке 'output', сохраняются каждая реплика диалога в отдельный файл и в файл целиком
 - Расширенные настройки: Настройте параметры генерации, такие как длина промпта, максимальное количество токенов, температура и штраф за повторение.
+
+**Отказ от ответственности:**
+
+Все примеры голосов взяты из открытых источников и представлены с уважением к их носителям и исключительно в демонстрационных целях. Для коммерческого использования рекомендуем обращаться к авторам. Несанкционированное использование чужих голосов в коммерческих целях и без разрешений не только нарушает права их владельцев, но и может преследоваться по закону. Мы категорически запрещаем и осуждаем использование данной технологии для нарушения чьих-либо прав или для совершения противоправных действий!
+
+Другие голоса вы можете взять [здесь](https://t.me/neuroportchat/6633) 
 
 <table>
   <tr>
