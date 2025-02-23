@@ -440,11 +440,12 @@ def generate_dialogue_audio(
 trans_file = "translations.json"
 with open(trans_file, 'r', encoding='utf-8') as file:
     lang_store = json.load(file)
-js_func="""
-        () => {
-            document.body.classList.toggle('dark');
-        }
-        """
+#js_func="""
+#        () => {
+#            document.body.classList.toggle('dark');
+#        }
+#        """
+js_func="() => {const params = new URLSearchParams(window.location.search);if (!params.has('__theme')) {params.set('__theme', 'dark');window.location.search = params.toString();}}"
 with gr.Blocks(js=js_func,title="Fish Speech Dialog Mod") as app:
         gr.Markdown(gettext("HEADER_MD"))
         lang = gr.Dropdown(label="Select interface language",choices=["eng", "rus"],interactive=True,value="eng")
