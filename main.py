@@ -150,7 +150,6 @@ def parse_dialogue(text):
     if current_speaker and current_text:
         dialogue_parts.append((current_speaker, ' '.join(current_text)))
         phrases_count += 1
-        
     return dialogue_parts, len(speakers), phrases_count, total_chars
 
 def update_dialogue_stats(text):
@@ -278,35 +277,52 @@ def on_dialogue_change(text):
     # Обновления для всех 10 аккордеонов
     for i in range(10):
         updates.append(gr.update(visible=(i < num_to_show)))
-    
+
     updates.append(stats)
     updates.append(gr.update(value=num_to_show))
-    
+    unique_names = []
     # Обновления для компонентов каждого спикера
     for i in range(10):
         if i < len(dialogue_parts):
             # Для существующих строк диалога берем имя прямо из dialogue_parts
             name = dialogue_parts[i][0]
-            updates.extend([
+            if name not in unique_names:
+              unique_names.append(name)
+              updates.extend([
                 gr.update(value=name),
                 gr.update(),
                 gr.update(),
                 gr.update(choices=[""] + example_audio_files)
-            ])
+              ])
         else:
             # Для дополнительных слотов создаем нового пользователя
             name = gettext("User") + f" {i+1}"
             initial_audio = np.random.choice(example_audio_files) if example_audio_files else ""
             initial_audio_path = os.path.join("examples", initial_audio) if initial_audio else None
             initial_transcript = get_audio_transcription(initial_audio_path) if initial_audio_path else ""
-            
             updates.extend([
                 gr.update(value=name),
                 gr.update(value=initial_audio_path),
                 gr.update(value=initial_transcript),
                 gr.update(value=initial_audio, choices=[""] + example_audio_files)
             ])
-    
+    current_length = len(updates)
+
+    while current_length < 52:
+        i += 1
+        name = gettext("User") + f" {i + 1}"
+        initial_audio = np.random.choice(example_audio_files) if example_audio_files else ""
+        initial_audio_path = os.path.join("examples", initial_audio) if initial_audio else None
+        initial_transcript = get_audio_transcription(initial_audio_path) if initial_audio_path else ""
+
+        updates.extend([
+          gr.update(value=name),
+          gr.update(value=initial_audio_path),
+          gr.update(value=initial_transcript),
+          gr.update(value=initial_audio, choices=[""] + example_audio_files)
+        ])
+
+        current_length = len(updates)
     return updates
 
 def update_speaker_visibility(num):
