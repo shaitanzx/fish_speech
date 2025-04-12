@@ -32,7 +32,10 @@ torchaudio.set_audio_backend("soundfile")
 
 from loguru import logger
 from transformers import AutoTokenizer
-
+import sys
+root = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(root)
+os.chdir(root)
 from fish_speech.i18n import i18n
 from fish_speech.text.chn_text_norm.text import Text as ChnNormedText
 from fish_speech.utils import autocast_exclude_mps, set_seed
