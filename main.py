@@ -8,7 +8,7 @@ def install(package):
     except ImportError:
         subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
-install("gradio_i18n")
+install("gradio_i18n==0.2.1")
 
 
 import os
