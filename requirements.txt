@@ -10,7 +10,7 @@ einops
 librosa
 rich
 gradio
-gradio-i18n
+gradio_i18n==0.2.1
 wandb
 grpcio
 kui
