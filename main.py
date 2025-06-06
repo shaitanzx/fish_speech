@@ -437,6 +437,8 @@ def generate_dialogue_audio(
 
 
 
+
+
 trans_file = "translations.json"
 with open(trans_file, 'r', encoding='utf-8') as file:
     lang_store = json.load(file)
