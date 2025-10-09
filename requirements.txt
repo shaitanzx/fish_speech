@@ -9,7 +9,7 @@ natsort
 einops
 librosa
 rich
-gradio=5.13.2
+gradio==5.13.2
 gradio_i18n==0.2.1
 wandb
 grpcio
