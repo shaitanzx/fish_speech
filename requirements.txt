@@ -1,4 +1,5 @@
 torch==2.3.0
+pydantic==2.10.6
 torchaudio
 transformers
 datasets
